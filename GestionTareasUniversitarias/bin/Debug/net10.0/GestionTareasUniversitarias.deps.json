@@ -9,6 +9,7 @@
       "GestionTareasUniversitarias/1.0.0": {
         "dependencies": {
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "10.0.9",
+          "Microsoft.AspNetCore.Identity.UI": "10.0.9",
           "Microsoft.EntityFrameworkCore.Design": "10.0.9",
           "Microsoft.EntityFrameworkCore.SqlServer": "10.0.9",
           "Microsoft.VisualStudio.Web.CodeGeneration.Design": "10.0.3"
@@ -589,6 +590,14 @@
         },
         "runtime": {
           "lib/net10.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": {
+            "assemblyVersion": "10.0.9.0",
+            "fileVersion": "10.0.926.27113"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Identity.UI/10.0.9": {
+        "runtime": {
+          "lib/net10.0/Microsoft.AspNetCore.Identity.UI.dll": {
             "assemblyVersion": "10.0.9.0",
             "fileVersion": "10.0.926.27113"
           }
@@ -2237,6 +2246,13 @@
       "sha512": "sha512-5yHCQ6fDsOKJTCyXCHb7Q4KFPrlTF5k+u5unV7GXI89NJkvgk6nXr6jGxdBi003Sx8MzTjZGpjABLmpOZ2Pg1A==",
       "path": "microsoft.aspnetcore.identity.entityframeworkcore/10.0.9",
       "hashPath": "microsoft.aspnetcore.identity.entityframeworkcore.10.0.9.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Identity.UI/10.0.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-4VYkt04Vqkju3srIXzcVbYxEmhCmzI+NXw1HXl96CXhzx8CZimNKOkqjgO3QO844gDdwF9mWGnOwkKpD0qtEcA==",
+      "path": "microsoft.aspnetcore.identity.ui/10.0.9",
+      "hashPath": "microsoft.aspnetcore.identity.ui.10.0.9.nupkg.sha512"
     },
     "Microsoft.AspNetCore.Razor.Language/6.0.24": {
       "type": "package",
