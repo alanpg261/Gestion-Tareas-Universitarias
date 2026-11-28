@@ -1,0 +1,40 @@
+name: Desplegar a Azure App Service
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: gestion-tareas-iue
+  RUTA_PROYECTO: GestionTareasUniversitarias/GestionTareasUniversitarias.csproj
+  DOTNET_VERSION: '10.0.x'
+
+jobs:
+  compilar-y-desplegar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restaurar paquetes
+        run: dotnet restore ${{ env.RUTA_PROYECTO }}
+
+      - name: Compilar
+        run: dotnet build ${{ env.RUTA_PROYECTO }} --no-restore --configuration Release
+
+      - name: Publicar
+        run: dotnet publish ${{ env.RUTA_PROYECTO }} --no-build --configuration Release --output ./publicacion
+
+      - name: Desplegar a Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publicacion
