@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +8,7 @@ using GestionTareasUniversitarias.Models;
 
 namespace GestionTareasUniversitarias.Controllers
 {
+    [Authorize]
     public class TareasController : Controller
     {
         private readonly AppDbContext _context;
@@ -19,11 +18,43 @@ namespace GestionTareasUniversitarias.Controllers
             _context = context;
         }
 
+        private string UsuarioId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
         // GET: Tareas
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? materiaId, int? estado, string? buscar)
         {
-            var appDbContext = _context.Tareas.Include(t => t.Materia);
-            return View(await appDbContext.ToListAsync());
+            var query = _context.Tareas
+                .Include(t => t.Materia)
+                .Where(t => t.Materia.UsuarioId == UsuarioId);
+
+            if (materiaId.HasValue)
+            {
+                query = query.Where(t => t.MateriaId == materiaId);
+            }
+            if (estado == 99)
+            {
+                query = query.Where(t => t.Estado != EstadoTarea.Completada && t.FechaLimite < DateTime.Now);
+            }
+            else if (estado.HasValue && Enum.IsDefined(typeof(EstadoTarea), estado.Value))
+            {
+                query = query.Where(t => (int)t.Estado == estado.Value);
+            }
+            if (!string.IsNullOrWhiteSpace(buscar))
+            {
+                query = query.Where(t => t.Titulo.Contains(buscar)
+                    || (t.Descripcion != null && t.Descripcion.Contains(buscar)));
+            }
+
+            var tareas = await query
+                .OrderBy(t => t.FechaLimite)
+                .ToListAsync();
+
+            ViewData["MateriaId"] = MateriasSelectList(materiaId);
+            ViewData["MateriaIdSeleccionada"] = materiaId;
+            ViewData["EstadoFiltro"] = estado;
+            ViewData["Buscar"] = buscar;
+
+            return View(tareas);
         }
 
         // GET: Tareas/Details/5
@@ -34,9 +65,7 @@ namespace GestionTareasUniversitarias.Controllers
                 return NotFound();
             }
 
-            var tarea = await _context.Tareas
-                .Include(t => t.Materia)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var tarea = await BuscarTareaPropiaAsync(id.Value);
             if (tarea == null)
             {
                 return NotFound();
@@ -48,24 +77,24 @@ namespace GestionTareasUniversitarias.Controllers
         // GET: Tareas/Create
         public IActionResult Create()
         {
-            ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "Nombre");
+            ViewData["MateriaId"] = MateriasSelectList();
             return View();
         }
 
         // POST: Tareas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Titulo,Descripcion,FechaLimite,Completada,MateriaId")] Tarea tarea)
+        public async Task<IActionResult> Create([Bind("Id,Titulo,Descripcion,FechaLimite,Estado,MateriaId")] Tarea tarea)
         {
+            await ValidarMateriaPropiaAsync(tarea);
+
             if (ModelState.IsValid)
             {
                 _context.Add(tarea);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "Nombre", tarea.MateriaId);
+            ViewData["MateriaId"] = MateriasSelectList(tarea.MateriaId);
             return View(tarea);
         }
 
@@ -77,32 +106,38 @@ namespace GestionTareasUniversitarias.Controllers
                 return NotFound();
             }
 
-            var tarea = await _context.Tareas.FindAsync(id);
+            var tarea = await BuscarTareaPropiaAsync(id.Value);
             if (tarea == null)
             {
                 return NotFound();
             }
-            ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "Nombre", tarea.MateriaId);
+            ViewData["MateriaId"] = MateriasSelectList(tarea.MateriaId);
             return View(tarea);
         }
 
         // POST: Tareas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Titulo,Descripcion,FechaLimite,Completada,MateriaId")] Tarea tarea)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Titulo,Descripcion,FechaLimite,Estado,MateriaId")] Tarea tarea)
         {
             if (id != tarea.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            var tareaExistente = await BuscarTareaPropiaAsync(id);
+            if (tareaExistente == null)
+            {
+                return NotFound();
+            }
+
+            await ValidarMateriaPropiaAsync(tarea);
+
+            if (await TryUpdateModelAsync(tareaExistente, "", t => t.Titulo, t => t.Descripcion,
+                t => t.FechaLimite, t => t.Estado, t => t.MateriaId))
             {
                 try
                 {
-                    _context.Update(tarea);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -118,7 +153,7 @@ namespace GestionTareasUniversitarias.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["MateriaId"] = new SelectList(_context.Materias, "Id", "Nombre", tarea.MateriaId);
+            ViewData["MateriaId"] = MateriasSelectList(tarea.MateriaId);
             return View(tarea);
         }
 
@@ -130,9 +165,7 @@ namespace GestionTareasUniversitarias.Controllers
                 return NotFound();
             }
 
-            var tarea = await _context.Tareas
-                .Include(t => t.Materia)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var tarea = await BuscarTareaPropiaAsync(id.Value);
             if (tarea == null)
             {
                 return NotFound();
@@ -146,7 +179,7 @@ namespace GestionTareasUniversitarias.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var tarea = await _context.Tareas.FindAsync(id);
+            var tarea = await BuscarTareaPropiaAsync(id);
             if (tarea != null)
             {
                 _context.Tareas.Remove(tarea);
@@ -156,9 +189,34 @@ namespace GestionTareasUniversitarias.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        private Task<Tarea?> BuscarTareaPropiaAsync(int id)
+        {
+            return _context.Tareas
+                .Include(t => t.Materia)
+                .FirstOrDefaultAsync(t => t.Id == id && t.Materia.UsuarioId == UsuarioId);
+        }
+
+        private SelectList MateriasSelectList(object? seleccionada = null)
+        {
+            var materias = _context.Materias
+                .Where(m => m.UsuarioId == UsuarioId)
+                .OrderBy(m => m.Nombre);
+            return new SelectList(materias, "Id", "Nombre", seleccionada);
+        }
+
+        private async Task ValidarMateriaPropiaAsync(Tarea tarea)
+        {
+            var materiaEsPropia = await _context.Materias
+                .AnyAsync(m => m.Id == tarea.MateriaId && m.UsuarioId == UsuarioId);
+            if (!materiaEsPropia)
+            {
+                ModelState.AddModelError("MateriaId", "Debe seleccionar una materia propia.");
+            }
+        }
+
         private bool TareaExists(int id)
         {
-            return _context.Tareas.Any(e => e.Id == id);
+            return _context.Tareas.Any(e => e.Id == id && e.Materia.UsuarioId == UsuarioId);
         }
     }
 }

@@ -16,7 +16,7 @@ public class Tarea
     [Required]
     public DateTime FechaLimite { get; set; }
 
-    public bool Completada { get; set; }
+    public EstadoTarea Estado { get; set; } = EstadoTarea.Pendiente;
 
     public int MateriaId { get; set; }
 

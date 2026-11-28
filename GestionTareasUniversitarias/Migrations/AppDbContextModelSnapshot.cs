@@ -104,7 +104,13 @@ namespace GestionTareasUniversitarias.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("Materias");
                 });
@@ -117,12 +123,12 @@ namespace GestionTareasUniversitarias.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Completada")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Descripcion")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("FechaLimite")
                         .HasColumnType("datetime2");
@@ -275,6 +281,17 @@ namespace GestionTareasUniversitarias.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("GestionTareasUniversitarias.Models.Materia", b =>
+                {
+                    b.HasOne("GestionTareasUniversitarias.Models.ApplicationUser", "Usuario")
+                        .WithMany("Materias")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("GestionTareasUniversitarias.Models.Tarea", b =>
                 {
                     b.HasOne("GestionTareasUniversitarias.Models.Materia", "Materia")
@@ -335,6 +352,11 @@ namespace GestionTareasUniversitarias.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("GestionTareasUniversitarias.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Materias");
                 });
 
             modelBuilder.Entity("GestionTareasUniversitarias.Models.Materia", b =>

@@ -13,5 +13,10 @@ public class Materia
     [StringLength(300)]
     public string? Descripcion { get; set; }
 
+    [Required]
+    public string UsuarioId { get; set; } = string.Empty;
+
+    public ApplicationUser? Usuario { get; set; }
+
     public ICollection<Tarea> Tareas { get; set; } = new List<Tarea>();
 }

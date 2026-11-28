@@ -1,10 +1,10 @@
 @model GestionTareasUniversitarias.Models.Tarea
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalle de la tarea";
 }
 
-<h1>Details</h1>
+<h1>Detalle de la tarea</h1>
 
 <div>
     <h4>Tarea</h4>
@@ -29,10 +29,10 @@
             @Html.DisplayFor(model => model.FechaLimite)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Completada)
+            @Html.DisplayNameFor(model => model.Estado)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Completada)
+            @Html.DisplayFor(model => model.Estado)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Materia)

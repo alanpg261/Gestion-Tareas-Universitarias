@@ -1,15 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GestionTareasUniversitarias.Data;
 using GestionTareasUniversitarias.Models;
 
 namespace GestionTareasUniversitarias.Controllers
 {
+    [Authorize]
     public class MateriasController : Controller
     {
         private readonly AppDbContext _context;
@@ -19,10 +17,15 @@ namespace GestionTareasUniversitarias.Controllers
             _context = context;
         }
 
+        private string UsuarioId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
         // GET: Materias
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Materias.ToListAsync());
+            return View(await _context.Materias
+                .Include(m => m.Tareas)
+                .Where(m => m.UsuarioId == UsuarioId)
+                .ToListAsync());
         }
 
         // GET: Materias/Details/5
@@ -34,7 +37,7 @@ namespace GestionTareasUniversitarias.Controllers
             }
 
             var materia = await _context.Materias
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == UsuarioId);
             if (materia == null)
             {
                 return NotFound();
@@ -50,14 +53,14 @@ namespace GestionTareasUniversitarias.Controllers
         }
 
         // POST: Materias/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nombre,Descripcion")] Materia materia)
         {
+            ModelState.Remove(nameof(materia.UsuarioId));
             if (ModelState.IsValid)
             {
+                materia.UsuarioId = UsuarioId;
                 _context.Add(materia);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -73,7 +76,8 @@ namespace GestionTareasUniversitarias.Controllers
                 return NotFound();
             }
 
-            var materia = await _context.Materias.FindAsync(id);
+            var materia = await _context.Materias
+                .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == UsuarioId);
             if (materia == null)
             {
                 return NotFound();
@@ -82,8 +86,6 @@ namespace GestionTareasUniversitarias.Controllers
         }
 
         // POST: Materias/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Descripcion")] Materia materia)
@@ -93,11 +95,17 @@ namespace GestionTareasUniversitarias.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            var materiaExistente = await _context.Materias
+                .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == UsuarioId);
+            if (materiaExistente == null)
+            {
+                return NotFound();
+            }
+
+            if (await TryUpdateModelAsync(materiaExistente, "", m => m.Nombre, m => m.Descripcion))
             {
                 try
                 {
-                    _context.Update(materia);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -125,7 +133,7 @@ namespace GestionTareasUniversitarias.Controllers
             }
 
             var materia = await _context.Materias
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == UsuarioId);
             if (materia == null)
             {
                 return NotFound();
@@ -139,7 +147,8 @@ namespace GestionTareasUniversitarias.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var materia = await _context.Materias.FindAsync(id);
+            var materia = await _context.Materias
+                .FirstOrDefaultAsync(m => m.Id == id && m.UsuarioId == UsuarioId);
             if (materia != null)
             {
                 _context.Materias.Remove(materia);
@@ -151,7 +160,7 @@ namespace GestionTareasUniversitarias.Controllers
 
         private bool MateriaExists(int id)
         {
-            return _context.Materias.Any(e => e.Id == id);
+            return _context.Materias.Any(e => e.Id == id && e.UsuarioId == UsuarioId);
         }
     }
 }
