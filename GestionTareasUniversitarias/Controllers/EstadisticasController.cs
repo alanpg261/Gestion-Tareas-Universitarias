@@ -7,7 +7,7 @@ using GestionTareasUniversitarias.Models;
 
 namespace GestionTareasUniversitarias.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Estudiante")]
 public class EstadisticasController : Controller
 {
     private readonly AppDbContext _context;

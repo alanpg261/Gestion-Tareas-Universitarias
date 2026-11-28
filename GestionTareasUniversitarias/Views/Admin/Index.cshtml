@@ -1,0 +1,104 @@
+@model GestionTareasUniversitarias.Models.AdminViewModel
+
+@{
+    ViewData["Title"] = "Panel administrativo";
+}
+
+<h1 class="page-title">Panel administrativo</h1>
+<p class="page-subtitle">Gestión de usuarios y supervisión general de la plataforma.</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icono">👥</div>
+            <div class="stat-valor">@Model.TotalUsuarios</div>
+            <div class="stat-nombre">Usuarios registrados</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icono">📚</div>
+            <div class="stat-valor">@Model.TotalMaterias</div>
+            <div class="stat-nombre">Materias creadas</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icono">📝</div>
+            <div class="stat-valor">@Model.TotalTareas</div>
+            <div class="stat-nombre">Tareas registradas</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icono">✅</div>
+            <div class="stat-valor">@Model.TasaCompletadas%</div>
+            <div class="stat-nombre">Tareas completadas</div>
+        </div>
+    </div>
+</div>
+
+<div class="stat-card">
+    <h5 class="mb-3">Usuarios</h5>
+
+    @if (!Model.Usuarios.Any())
+    {
+        <div class="alert alert-info mb-0">No hay usuarios registrados.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Correo</th>
+                        <th>Rol</th>
+                        <th>Materias</th>
+                        <th>Tareas</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var usuario in Model.Usuarios)
+                    {
+                        <tr>
+                            <td>@usuario.Correo</td>
+                            <td>
+                                <span class="estado-badge @(usuario.Rol == "Administrador" ? "b-progreso" : "b-pendiente")">@usuario.Rol</span>
+                            </td>
+                            <td>@usuario.Materias</td>
+                            <td>@usuario.Tareas</td>
+                            <td>
+                                @if (usuario.Bloqueado)
+                                {
+                                    <span class="estado-badge b-vencida">Bloqueado</span>
+                                }
+                                else
+                                {
+                                    <span class="estado-badge b-completada">Activo</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                @if (usuario.Bloqueado)
+                                {
+                                    <form asp-action="Desbloquear" asp-route-id="@usuario.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Desbloquear</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Bloquear" asp-route-id="@usuario.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Bloquear</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

@@ -20,6 +20,11 @@ public class HomeController : Controller
     [Authorize]
     public async Task<IActionResult> Index()
     {
+        if (User.IsInRole("Administrador"))
+        {
+            return RedirectToAction("Index", "Admin");
+        }
+
         var usuarioId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var ahora = DateTime.Now;
 
