@@ -8,9 +8,7 @@ Plataforma web para que estudiantes universitarios organicen sus actividades aca
 
 ## Integrantes
 
-- *(nombre del integrante 1)*
-- *(nombre del integrante 2)*
-- *(nombre del integrante 3)*
+- *Alan Pareja*
 
 ## Stack
 
