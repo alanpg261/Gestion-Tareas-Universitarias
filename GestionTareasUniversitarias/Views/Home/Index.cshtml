@@ -50,29 +50,9 @@
                 <h5 class="mb-0">Próximas a vencer</h5>
                 <a asp-controller="Tareas" asp-action="Index" class="btn btn-sm btn-outline-secondary">Ver todas</a>
             </div>
-            @if (!Model.ListaProximas.Any())
-            {
-                <div class="alert alert-info mb-0">
-                    No tienes tareas próximas a vencer en las siguientes 72 horas. ¡Buen trabajo!
-                </div>
-            }
-            else
-            {
-                <div class="d-flex flex-column gap-2">
-                    @foreach (var tarea in Model.ListaProximas)
-                    {
-                        var horas = (tarea.FechaLimite - ahora).TotalHours;
-                        var texto = horas < 24 ? $"en {(int)horas} horas" : $"en {(int)(horas / 24)} días";
-                        <div class="d-flex justify-content-between align-items-center p-2 rounded" style="background: rgba(59,130,246,.07);">
-                            <div>
-                                <strong class="d-block">@tarea.Titulo</strong>
-                                <small class="text-muted">@tarea.Materia?.Nombre</small>
-                            </div>
-                            <span class="estado-badge b-pendiente">⏳ @texto</span>
-                        </div>
-                    }
-                </div>
-            }
+            <div id="proximas-lista" class="d-flex flex-column gap-2">
+                <div class="text-muted">Cargando próximas a vencer…</div>
+            </div>
         </div>
     </div>
     <div class="col-lg-5">
@@ -121,3 +101,7 @@
     <a asp-controller="Materias" asp-action="Create" class="btn btn-outline-secondary">+ Nueva materia</a>
     <a asp-controller="Estadisticas" asp-action="Index" class="btn btn-outline-secondary">Ver estadísticas</a>
 </div>
+
+@section Scripts {
+    <script src="~/js/tareas.js" asp-append-version="true"></script>
+}

@@ -39,12 +39,6 @@ public class HomeController : Controller
             Vencidas = await activasNoCompletadas.CountAsync(t => t.FechaLimite < ahora),
             ProximasAVencer = await activasNoCompletadas.CountAsync(t =>
                 t.FechaLimite >= ahora && t.FechaLimite <= ahora.AddHours(72)),
-            ListaProximas = await activasNoCompletadas
-                .Include(t => t.Materia)
-                .Where(t => t.FechaLimite >= ahora && t.FechaLimite <= ahora.AddHours(72))
-                .OrderBy(t => t.FechaLimite)
-                .Take(5)
-                .ToListAsync(),
             ListaRecientes = await tareas
                 .Include(t => t.Materia)
                 .OrderByDescending(t => t.Id)

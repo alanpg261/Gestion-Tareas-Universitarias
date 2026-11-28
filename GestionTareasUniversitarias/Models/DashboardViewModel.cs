@@ -9,6 +9,5 @@ public class DashboardViewModel
     public int ProximasAVencer { get; set; }
     public int TasaCompletadas { get; set; }
 
-    public List<Tarea> ListaProximas { get; set; } = new();
     public List<Tarea> ListaRecientes { get; set; } = new();
 }

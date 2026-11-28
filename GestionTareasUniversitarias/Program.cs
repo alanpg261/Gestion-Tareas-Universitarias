@@ -2,6 +2,7 @@ using GestionTareasUniversitarias.Data;
 using GestionTareasUniversitarias.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // MVC
 builder.Services.AddControllersWithViews();
+
+// OpenAPI (documentacion de la API)
+builder.Services.AddOpenApi();
 
 // Identity
 builder.Services.AddRazorPages();
@@ -45,6 +49,12 @@ app.UseStatusCodePagesWithReExecute("/Home/Error404");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapOpenApi();
+if (app.Environment.IsDevelopment())
+{
+    app.MapScalarApiReference();
+}
 
 app.MapStaticAssets();
 

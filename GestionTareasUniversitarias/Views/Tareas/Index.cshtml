@@ -6,6 +6,8 @@
     var buscar = ViewBag.Buscar as string;
 }
 
+@Html.AntiForgeryToken()
+
 <div class="d-flex justify-content-between align-items-start mb-4">
     <div>
         <h1 class="page-title">Mis Tareas</h1>
@@ -69,6 +71,10 @@ else
                     <div class="d-flex justify-content-between align-items-center mt-auto pt-2">
                         <span class="fecha @(vencida ? "vencida-fecha" : "")">📅 @item.FechaLimite.ToString("dd MMM yyyy")</span>
                         <span class="acciones">
+                            @if (item.Estado != EstadoTarea.Completada)
+                            {
+                                <button type="button" class="btn-completar" data-id="@item.Id" title="Marcar como completada">✔</button>
+                            }
                             <a asp-action="Edit" asp-route-id="@item.Id" title="Editar">✏️</a>
                             <a asp-action="Delete" asp-route-id="@item.Id" title="Eliminar">🗑️</a>
                         </span>
@@ -77,4 +83,8 @@ else
             </div>
         }
     </div>
+}
+
+@section Scripts {
+    <script src="~/js/tareas.js" asp-append-version="true"></script>
 }
