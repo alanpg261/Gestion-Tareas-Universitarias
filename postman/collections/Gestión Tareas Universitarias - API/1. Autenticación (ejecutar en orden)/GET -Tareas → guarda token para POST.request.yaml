@@ -1,0 +1,15 @@
+$kind: http-request
+name: GET /Tareas → guarda token para POST
+url: "{{baseUrl}}/Tareas"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      // Extrae el token de la página de tareas y lo guarda
+      const m = pm.response.text().match(/name="__RequestVerificationToken"[^>]*value="([^"]+)"/);
+      if (m) {
+          pm.collectionVariables.set("afToken", m[1]);
+          console.log("Token para POST guardado en {{afToken}}");
+      }
+    language: text/javascript
+order: 3000

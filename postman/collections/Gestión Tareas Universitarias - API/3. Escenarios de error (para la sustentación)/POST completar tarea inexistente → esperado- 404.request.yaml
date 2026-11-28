@@ -1,0 +1,7 @@
+$kind: http-request
+name: "POST completar tarea inexistente → esperado: 404"
+url: "{{baseUrl}}/api/tareas/999/completar"
+method: POST
+headers:
+  RequestVerificationToken: "{{afToken}}"
+order: 2000

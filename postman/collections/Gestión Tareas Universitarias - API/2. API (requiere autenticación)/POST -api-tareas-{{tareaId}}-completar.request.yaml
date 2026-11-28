@@ -1,0 +1,7 @@
+$kind: http-request
+name: POST /api/tareas/{{tareaId}}/completar
+url: "{{baseUrl}}/api/tareas/{{tareaId}}/completar"
+method: POST
+headers:
+  RequestVerificationToken: "{{afToken}}"
+order: 4000

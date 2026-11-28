@@ -1,0 +1,7 @@
+$kind: collection
+description: "Pruebas de la API REST. EJECUTAR EN ORDEN: primero la carpeta 1 (Autenticación) de arriba hacia abajo; los scripts guardan los tokens automáticamente. Requiere la app corriendo en local (https://localhost:7218) y SSL verification desactivado en Postman (Settings)."
+variables:
+  baseUrl: https://localhost:7218
+  loginToken: ""
+  afToken: ""
+  tareaId: "1"

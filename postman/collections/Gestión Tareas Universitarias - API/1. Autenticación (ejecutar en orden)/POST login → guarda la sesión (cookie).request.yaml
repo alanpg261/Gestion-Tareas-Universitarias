@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/Identity/Account/Login"
+method: POST
+body:
+  type: urlencoded
+  content:
+    Input.Email: estudiante@ejemplo.com
+    Input.Password: Temporal123!
+    Input.RememberMe: "false"
+    __RequestVerificationToken: "{{loginToken}}"
+order: 2000

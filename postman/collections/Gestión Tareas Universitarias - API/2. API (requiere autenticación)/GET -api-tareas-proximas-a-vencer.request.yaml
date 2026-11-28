@@ -1,0 +1,5 @@
+$kind: http-request
+name: GET /api/tareas/proximas-a-vencer
+url: "{{baseUrl}}/api/tareas/proximas-a-vencer"
+method: GET
+order: 2000

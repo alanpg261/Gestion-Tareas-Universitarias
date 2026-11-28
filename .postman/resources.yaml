@@ -1,0 +1,11 @@
+# Use this workspace to collaborate
+workspace:
+  id: c6369a83-0733-4bfc-862e-e42cb5762dbd
+
+localResources:
+  collections:
+    - ../docs/postman/GestionTareasUniversitarias.postman_collection.json
+
+cloudResources:
+  collections:
+    ../postman/collections/Gestión Tareas Universitarias - API: 1a3db54a-e113-4d6a-9f39-8bfcc7a47290

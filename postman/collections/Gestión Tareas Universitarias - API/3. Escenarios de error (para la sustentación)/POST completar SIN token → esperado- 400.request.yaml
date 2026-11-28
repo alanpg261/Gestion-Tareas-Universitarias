@@ -1,0 +1,5 @@
+$kind: http-request
+name: "POST completar SIN token → esperado: 400"
+url: "{{baseUrl}}/api/tareas/{{tareaId}}/completar"
+method: POST
+order: 1000

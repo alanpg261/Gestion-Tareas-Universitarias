@@ -1,0 +1,6 @@
+$kind: http-request
+name: "GET /api/tareas sin login → esperado: redirección al login"
+description: "Para probarla sin sesión: Postman → Cookies → borra la cookie .AspNetCore.Identity.Application de localhost, ejecuta y vuelve a autenticarte con la carpeta 1."
+url: "{{baseUrl}}/api/tareas"
+method: GET
+order: 3000

@@ -1,0 +1,5 @@
+$kind: http-request
+name: GET /api/tareas/estadisticas
+url: "{{baseUrl}}/api/tareas/estadisticas"
+method: GET
+order: 3000

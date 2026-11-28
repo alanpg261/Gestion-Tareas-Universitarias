@@ -106,16 +106,17 @@ Puede:
 
 ### Incluye
 
-- Registro e inicio de sesión.
-- Gestión de materias.
-- Creación de tareas.
-- Edición de tareas.
-- Eliminación de tareas.
-- Asignación de fechas límite.
-- Clasificación por asignaturas.
-- Gestión de estados.
-- Visualización de tareas pendientes y completadas.
-- Dashboard principal.
+- Registro e inicio de sesión con roles (Estudiante y Administrador).
+- Gestión de materias (CRUD completo).
+- Creación, edición y eliminación de tareas con asignación de fechas límite.
+- Estados de tarea: Pendiente, En progreso, Completada y Vencida (con identificación visual).
+- Clasificación por asignaturas y filtrado por estado, materia y búsqueda de texto.
+- Alertas visuales de vencimiento y de proximidad a la fecha límite (72 horas).
+- Dashboard principal con indicadores, próximas a vencer y tareas recientes.
+- Estadísticas de productividad por materia.
+- Panel administrativo: gestión de usuarios (bloqueo/desbloqueo) y estadísticas globales.
+- API REST propia documentada con OpenAPI, consumida desde el frontend con `fetch`.
+- Publicación en internet con despliegue continuo desde GitHub (ver sección 15).
 
 ### No incluye
 
@@ -149,33 +150,33 @@ Puede:
 
 ## 7. Requerimientos funcionales
 
-| ID | Requerimiento | Rol | Prioridad |
-|------|------|------|------|
-| RF-01 | El sistema debe permitir el registro de usuarios. | Invitado | Alta |
-| RF-02 | El sistema debe permitir iniciar sesión mediante correo y contraseña. | Todos | Alta |
-| RF-03 | El sistema debe permitir crear tareas. | Estudiante | Alta |
-| RF-04 | El sistema debe permitir editar tareas existentes. | Estudiante | Alta |
-| RF-05 | El sistema debe permitir eliminar tareas. | Estudiante | Alta |
-| RF-06 | El sistema debe permitir marcar tareas como completadas. | Estudiante | Alta |
-| RF-07 | El sistema debe permitir gestionar materias. | Estudiante | Alta |
-| RF-08 | El sistema debe mostrar tareas filtradas por estado. | Estudiante | Media |
-| RF-09 | El sistema debe mostrar tareas filtradas por materia. | Estudiante | Media |
-| RF-10 | El sistema debe mostrar estadísticas de productividad. | Estudiante | Media |
-| RF-11 | El sistema debe permitir al administrador administrar usuarios. | Administrador | Alta |
-| RF-12 | El sistema debe permitir al administrador consultar estadísticas generales. | Administrador | Media |
+| ID | Requerimiento | Rol | Prioridad | Estado | Nota |
+|------|------|------|------|------|------|
+| RF-01 | El sistema debe permitir el registro de usuarios. | Invitado | Alta | Implementado | Registro con ASP.NET Core Identity. |
+| RF-02 | El sistema debe permitir iniciar sesión mediante correo y contraseña. | Todos | Alta | Implementado | Correo + contraseña con Identity; sesión por cookie. |
+| RF-03 | El sistema debe permitir crear tareas. | Estudiante | Alta | Implementado | Con materia, fecha límite y estado. |
+| RF-04 | El sistema debe permitir editar tareas existentes. | Estudiante | Alta | Implementado | Solo tareas propias (404 si no lo es). |
+| RF-05 | El sistema debe permitir eliminar tareas. | Estudiante | Alta | Implementado | Solo tareas propias. |
+| RF-06 | El sistema debe permitir marcar tareas como completadas. | Estudiante | Alta | Implementado | Modificado: el bool `Completada` se reemplazó por el enum `EstadoTarea` (Pendiente, EnProgreso, Completada, Vencida) según el modelo del documento. Se completa desde la vista y desde la API (`POST /api/tareas/{id}/completar`). |
+| RF-07 | El sistema debe permitir gestionar materias. | Estudiante | Alta | Implementado | CRUD completo; eliminar una materia elimina en cascada sus tareas. |
+| RF-08 | El sistema debe mostrar tareas filtradas por estado. | Estudiante | Media | Implementado | Pills de filtro; "Vencida" se calcula por fecha límite. |
+| RF-09 | El sistema debe mostrar tareas filtradas por materia. | Estudiante | Media | Implementado | Select de materias propias + búsqueda por texto. |
+| RF-10 | El sistema debe mostrar estadísticas de productividad. | Estudiante | Media | Implementado | Pantalla Estadísticas y tarjetas del dashboard (tasa de finalización y carga por materia). |
+| RF-11 | El sistema debe permitir al administrador administrar usuarios. | Administrador | Alta | Implementado | Modificado: se acotó a listar usuarios con su rol y conteos, y bloquear/desbloquear (lockout de Identity). La edición de perfiles quedó fuera del alcance. |
+| RF-12 | El sistema debe permitir al administrador consultar estadísticas generales. | Administrador | Media | Implementado | Tarjetas globales en el panel administrativo. |
 
 ## 8. Requerimientos no funcionales
 
-| ID | Categoría | Requerimiento |
-|------|------|------|
-| RNF-01 | Rendimiento | Las páginas principales deben cargar en menos de 3 segundos. |
-| RNF-02 | Rendimiento | Las consultas de tareas deben responder en menos de 2 segundos. |
-| RNF-03 | Seguridad | Las contraseñas deben almacenarse cifradas. |
-| RNF-04 | Seguridad | Cada usuario solo podrá acceder a su propia información. |
-| RNF-05 | Usabilidad | La plataforma debe ser utilizable desde dispositivos móviles con ancho mínimo de 360px. |
-| RNF-06 | Compatibilidad | Debe funcionar correctamente en Chrome, Edge y Firefox. |
-| RNF-07 | Disponibilidad | El sistema debe estar disponible al menos el 95% del tiempo. |
-| RNF-08 | Mantenibilidad | El código debe seguir arquitectura MVC durante el desarrollo. |
+| ID | Categoría | Requerimiento | Estado | Nota |
+|------|------|------|------|------|
+| RNF-01 | Rendimiento | Las páginas principales deben cargar en menos de 3 segundos. | Implementado | Cumple por diseño (páginas ligeras, consultas LINQ simples); no se hicieron pruebas de carga formales. |
+| RNF-02 | Rendimiento | Las consultas de tareas deben responder en menos de 2 segundos. | Implementado | Ídem; volumen académico bajo según supuestos. |
+| RNF-03 | Seguridad | Las contraseñas deben almacenarse cifradas. | Implementado | Identity las almacena con hash PBKDF2. |
+| RNF-04 | Seguridad | Cada usuario solo podrá acceder a su propia información. | Implementado | `UsuarioId` en Materia; todos los controladores y la API filtran por el usuario autenticado. |
+| RNF-05 | Usabilidad | La plataforma debe ser utilizable desde dispositivos móviles con ancho mínimo de 360px. | Implementado | Bootstrap 5 con rejilla responsive; el sidebar se apila en pantallas pequeñas. |
+| RNF-06 | Compatibilidad | Debe funcionar correctamente en Chrome, Edge y Firefox. | Implementado | Tecnologías estándar (HTML5, fetch, Bootstrap 5). |
+| RNF-07 | Disponibilidad | El sistema debe estar disponible al menos el 95% del tiempo. | Pendiente | Depende del despliegue en Azure; se evalúa sobre la dirección publicada. |
+| RNF-08 | Mantenibilidad | El código debe seguir arquitectura MVC durante el desarrollo. | Implementado | Modelos, vistas y controladores separados; lógica de datos en controladores/servicios inyectados, no en las vistas. |
 
 ## 9. Reglas de negocio
 
@@ -190,31 +191,30 @@ Puede:
 ## 10. Modelo de datos
 
 ### Usuario
-- id
-- nombre
+- id (Identity)
 - correo
-- contraseña
-- rol
+- contraseña (hash con PBKDF2 vía ASP.NET Core Identity)
+- rol (Estudiante o Administrador)
 
 ### Materia
 - id
 - nombre
 - descripcion
-- usuario_id
+- usuario_id (obligatorio, FK al usuario propietario)
 
 ### Tarea
 - id
 - titulo
 - descripcion
 - fecha_limite
-- estado
-- materia_id
+- estado (enum: Pendiente, EnProgreso, Completada, Vencida)
+- materia_id (obligatorio, FK)
 
 ### Relaciones
 
 - Un usuario tiene muchas materias.
 - Una materia pertenece a un usuario.
-- Una materia tiene muchas tareas.
+- Una materia tiene muchas tareas (borrado en cascada).
 - Una tarea pertenece a una materia.
 
 ## 11. Pantallas y flujo
@@ -527,6 +527,44 @@ Como administrador, quiero consultar estadísticas generales del sistema para co
 - Se asume el uso de Bootstrap y Tailwind CSS como frameworks de estilos para la interfaz, según lo indicado por el docente del curso.
 - Se asume que, al ser un proyecto con fines educativos, el volumen de usuarios y datos concurrentes será bajo, sin requerir consideraciones de escalabilidad a gran escala.
 
+## 14. Arquitectura, base de datos y API
+
+**Entorno:** ASP.NET Core MVC en .NET 10, Entity Framework Core 10 con SQL Server (local: SQL Server Express; producción: Azure SQL Database) y ASP.NET Core Identity para autenticación y roles.
+
+**Carpetas:** `Controllers/` (controladores MVC), `Controllers/Api/` (API REST), `Models/` (modelos de dominio y modelos de vista), `Views/` (vistas Razor), `Data/` (DbContext e inicializador), `Migrations/` (una migración por cambio del modelo).
+
+**Migraciones:** `InitialCreate` (Materias/Tareas), `AddIdentity` (tablas de Identity), `AddUsuarioAndEstado` (`UsuarioId` en Materia y enum `EstadoTarea` en Tarea).
+
+**API REST** — documentación OpenAPI en `/openapi/v1.json` y UI interactiva Scalar en `/scalar/v1` (entorno de desarrollo). Consumida desde el frontend con `fetch` (`wwwroot/js/tareas.js`).
+
+| Método | Ruta | Para qué sirve | Rol |
+|------|------|------|------|
+| GET | `/api/tareas` | Lista las tareas del estudiante autenticado. | Estudiante |
+| GET | `/api/tareas/proximas-a-vencer` | Lista las tareas que vencen en las próximas 72 horas. | Estudiante |
+| GET | `/api/tareas/estadisticas` | Devuelve conteos por estado y tasa de completadas. | Estudiante |
+| POST | `/api/tareas/{id}/completar` | Marca como completada una tarea propia. | Estudiante |
+
+## 15. Despliegue y configuración
+
+| Elemento | Local | Producción |
+|------|------|------|
+| Dirección | `https://localhost:7218` | Dirección pública de Azure App Service *(pendiente de publicar, ver Fase 7 del plan de trabajo)* |
+| Base de datos | SQL Server Express en el equipo del desarrollador | Azure SQL Database |
+| Cadena de conexión | Secretos de usuario (`dotnet user-secrets`) | Configuración de la aplicación en Azure (`ConnectionStrings__DefaultConnection`) |
+| Publicación | No aplica | Automática al integrar a `main` mediante GitHub Actions *(configurar en la Fase 7)* |
+
+Los valores privados **nunca** están en el repositorio: `appsettings.json` no contiene cadenas de conexión y `appsettings.example.json` muestra solo los nombres de las variables.
+
+## 16. Aportes por integrante
+
+| Integrante | Aportes principales | Evidencia |
+|---------|---------|---------|
+| *(nombre del integrante 1)* | *(por ejemplo: autenticación, roles y panel administrador)* | PR #, commits |
+| *(nombre del integrante 2)* | | |
+| *(nombre del integrante 3)* | | |
+
+Esta tabla se contrasta con el historial real de GitHub (commits y Pull Requests de cada integrante) y debe coincidir con él.
+
 ## Historial de cambios
 
 | Fecha | Cambio realizado | Autor |
@@ -540,6 +578,14 @@ Como administrador, quiero consultar estadísticas generales del sistema para co
 | 2026-09-25 | Conversión del SRS a documento de definición según los requisitos del entregable. | Equipo |
 | 2026-09-25 | Adición de requerimientos funcionales, no funcionales, mockups e historias de usuario. | Equipo |
 | 2026-09-25 | Reorganización del documento en las 13 secciones oficiales del entregable. | Equipo |
+| 2026-11-28 | Configuración por entornos: `.gitignore`, `bin/`/`obj/` fuera del repositorio y cadena de conexión movida a secretos de usuario; `appsettings.example.json`. | Equipo |
+| 2026-11-28 | Roles Estudiante/Administrador con semilla en desarrollo, aislamiento de datos por usuario (`UsuarioId`), enum `EstadoTarea` y migración `AddUsuarioAndEstado`. Motivo: cumplir RN-07, RNF-04 y la condición de roles del entregable final. | Equipo |
+| 2026-11-28 | Filtros por estado y materia, búsqueda de texto, badges de estado, listas vacías con aviso y página 404. Motivo: RF-08, RF-09, RN-06 y condición de páginas de estado del entregable. | Equipo |
+| 2026-11-28 | Sistema visual oscuro con sidebar y tarjetas, según los mockups del documento. | Equipo |
+| 2026-11-28 | Dashboard con indicadores, próximas a vencer y tareas recientes; pantalla de Estadísticas (RF-10). | Equipo |
+| 2026-11-28 | Panel administrativo: gestión de usuarios (bloqueo/desbloqueo) y estadísticas globales (RF-11, RF-12); pantallas separadas por rol. | Equipo |
+| 2026-11-28 | API REST de tareas con documentación OpenAPI (Scalar), consumida desde el frontend con `fetch` y manejo de errores. Motivo: condición de API propia del entregable final. | Equipo |
+| 2026-11-28 | Documento actualizado a versión final: estados de requerimientos, secciones 14–16 y colección de Postman. | Equipo |
 
 ## Referencias
 
@@ -557,6 +603,8 @@ Su uso se concentró principalmente en:
 - Sugerencias para la estructura de requerimientos funcionales y no funcionales.
 - Generación de propuestas visuales utilizadas como base para los mockups de la plataforma.
 
+Durante la fase final del proyecto se utilizó adicionalmente un agente de IA (Kimi Code) como apoyo en la implementación, la verificación y la documentación: configuración por entornos, roles y aislamiento de datos, interfaz de usuario, dashboard, panel administrativo, API REST y pruebas. Todas las sugerencias fueron revisadas, comprendidas y verificadas por los integrantes antes de integrarse; las pruebas funcionales se ejecutaron contra la aplicación real.
+
 La idea del proyecto, la definición del problema, los objetivos, las funcionalidades, las decisiones de alcance y la estructura general de la aplicación fueron definidas por los integrantes del equipo.
 
-Las sugerencias proporcionadas por la herramienta fueron revisadas, adaptadas y modificadas antes de incorporarse al documento final.
+Las sugerencias proporcionadas por las herramientas fueron revisadas, adaptadas y modificadas antes de incorporarse al documento final.
