@@ -1,0 +1,209 @@
+{
+	"info": {
+		"_postman_id": "a1f2c3d4-9b8e-4a7f-c6d5-2e1f0a9b8c7d",
+		"name": "Gestión Tareas Universitarias - API",
+		"description": "Pruebas de la API REST. EJECUTAR EN ORDEN: primero la carpeta 1 (Autenticación) de arriba hacia abajo; los scripts guardan los tokens automáticamente. Requiere la app corriendo en local (https://localhost:7218) y SSL verification desactivado en Postman (Settings).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Autenticación (ejecutar en orden)",
+			"item": [
+				{
+					"name": "GET página de login → guarda token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Extrae el token antifalsificación del formulario y lo guarda",
+									"const m = pm.response.text().match(/name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"/);",
+									"if (m) {",
+									"    pm.collectionVariables.set(\"loginToken\", m[1]);",
+									"    console.log(\"Token de login guardado en {{loginToken}}\");",
+									"} else {",
+									"    console.error(\"No se encontró el token en el HTML\");",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Identity/Account/Login",
+							"host": ["{{baseUrl}}"],
+							"path": ["Identity", "Account", "Login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST login → guarda la sesión (cookie)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{"key": "Input.Email", "value": "estudiante@ejemplo.com"},
+								{"key": "Input.Password", "value": "Temporal123!"},
+								{"key": "Input.RememberMe", "value": "false"},
+								{"key": "__RequestVerificationToken", "value": "{{loginToken}}"}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/Identity/Account/Login",
+							"host": ["{{baseUrl}}"],
+							"path": ["Identity", "Account", "Login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /Tareas → guarda token para POST",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"// Extrae el token de la página de tareas y lo guarda",
+									"const m = pm.response.text().match(/name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"/);",
+									"if (m) {",
+									"    pm.collectionVariables.set(\"afToken\", m[1]);",
+									"    console.log(\"Token para POST guardado en {{afToken}}\");",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/Tareas",
+							"host": ["{{baseUrl}}"],
+							"path": ["Tareas"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. API (requiere autenticación)",
+			"item": [
+				{
+					"name": "GET /api/tareas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tareas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tareas"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/tareas/proximas-a-vencer",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tareas/proximas-a-vencer",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tareas", "proximas-a-vencer"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/tareas/estadisticas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tareas/estadisticas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tareas", "estadisticas"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST /api/tareas/{{tareaId}}/completar",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "RequestVerificationToken", "value": "{{afToken}}"}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/tareas/{{tareaId}}/completar",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tareas", "{{tareaId}}", "completar"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Escenarios de error (para la sustentación)",
+			"item": [
+				{
+					"name": "POST completar SIN token → esperado: 400",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tareas/{{tareaId}}/completar",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tareas", "{{tareaId}}", "completar"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST completar tarea inexistente → esperado: 404",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "RequestVerificationToken", "value": "{{afToken}}"}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/tareas/999/completar",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tareas", "999", "completar"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/tareas sin login → esperado: redirección al login",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tareas",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tareas"]
+						},
+						"description": "Para probarla sin sesión: Postman → Cookies → borra la cookie .AspNetCore.Identity.Application de localhost, ejecuta y vuelve a autenticarte con la carpeta 1."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{"key": "baseUrl", "value": "https://localhost:7218"},
+		{"key": "loginToken", "value": ""},
+		{"key": "afToken", "value": ""},
+		{"key": "tareaId", "value": "1"}
+	]
+}
