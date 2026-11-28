@@ -1,31 +1,421 @@
+/* ============================================================
+   UniTask — Gestión Académica
+   Sistema visual: tema oscuro con sidebar
+   ============================================================ */
+
+:root {
+  --app-bg: #0a0f1a;
+  --sidebar-bg: #0c1322;
+  --card-bg: #131c31;
+  --card-bg-hover: #182238;
+  --card-border: #243150;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --text: #e2e8f0;
+  --text-muted: #8ea0c0;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #22c55e;
+  --info: #38bdf8;
+}
+
 html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+  font-size: 15px;
 }
 
 body {
-  margin-bottom: 60px;
+  background-color: var(--app-bg);
+  color: var(--text);
+  min-height: 100vh;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* ---------- Sidebar ---------- */
+
+.app-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 250px;
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--card-border);
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  z-index: 1030;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .25rem .5rem 1rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.sidebar-brand .brand-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), #60a5fa);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #fff;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.sidebar-brand strong {
+  display: block;
+  font-size: 1.05rem;
+  line-height: 1.1;
+}
+
+.sidebar-brand small {
+  color: var(--text-muted);
+  font-size: .75rem;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .75rem .5rem;
+  border-radius: .6rem;
+  background: rgba(59, 130, 246, .08);
+}
+
+.sidebar-user .avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.sidebar-user strong {
+  display: block;
+  font-size: .9rem;
+  line-height: 1.2;
+  word-break: break-all;
+}
+
+.sidebar-user small {
+  color: var(--text-muted);
+  font-size: .75rem;
+}
+
+.sidebar-section {
+  text-transform: uppercase;
+  font-size: .68rem;
+  letter-spacing: .12em;
+  color: var(--text-muted);
+  padding: .5rem .5rem .25rem;
+}
+
+.app-sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  padding: .55rem .75rem;
+  border-radius: .6rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: .92rem;
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.sidebar-link:hover {
+  background: rgba(59, 130, 246, .1);
+  color: var(--text);
+}
+
+.sidebar-link.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.sidebar-link .icon {
+  width: 1.2rem;
+  text-align: center;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--card-border);
+}
+
+.sidebar-footer button {
+  width: 100%;
+}
+
+/* ---------- Contenido principal ---------- */
+
+.app-main {
+  margin-left: 250px;
+  padding: 2rem 2.5rem;
+  min-height: 100vh;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: .15rem;
+}
+
+.page-subtitle {
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+/* ---------- Tarjetas de tareas ---------- */
+
+.task-card,
+.materia-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: .85rem;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+  height: 100%;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+
+.task-card:hover,
+.materia-card:hover {
+  background-color: var(--card-bg-hover);
+  border-color: #31447a;
+}
+
+.task-card h5,
+.materia-card h5 {
+  font-size: 1.02rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.task-card .desc,
+.materia-card .desc {
+  color: var(--text-muted);
+  font-size: .87rem;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.6em;
+}
+
+.task-card .fecha,
+.materia-card .fecha {
+  color: var(--text-muted);
+  font-size: .82rem;
+}
+
+.task-card .fecha.vencida-fecha {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.task-card .acciones a {
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-left: .6rem;
+  font-size: .85rem;
+}
+
+.task-card .acciones a:hover {
+  color: var(--text);
+}
+
+/* Etiqueta de materia con color */
+
+.materia-tag {
+  display: inline-block;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .2rem .55rem;
+  border-radius: .4rem;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag-0 { background: rgba(139, 92, 246, .18); color: #c4b5fd; }
+.tag-1 { background: rgba(56, 189, 248, .15); color: #7dd3fc; }
+.tag-2 { background: rgba(244, 114, 182, .15); color: #f9a8d4; }
+.tag-3 { background: rgba(74, 222, 128, .15);  color: #86efac; }
+.tag-4 { background: rgba(251, 146, 60, .15);  color: #fdba74; }
+.tag-5 { background: rgba(250, 204, 21, .15);  color: #fde047; }
+
+/* Badge de estado con punto */
+
+.estado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .75rem;
+  font-weight: 600;
+  padding: .2rem .6rem;
+  border-radius: .5rem;
+  white-space: nowrap;
+}
+
+.estado-badge::before {
+  content: "";
+  width: .45rem;
+  height: .45rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.b-pendiente  { background: rgba(245, 158, 11, .15); color: var(--warning); }
+.b-progreso   { background: rgba(56, 189, 248, .15); color: var(--info); }
+.b-completada { background: rgba(34, 197, 94, .15);  color: var(--success); }
+.b-vencida    { background: rgba(239, 68, 68, .15);  color: var(--danger); }
+
+/* ---------- Pills de filtro ---------- */
+
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: .35rem 1rem;
+  border-radius: .55rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: .85rem;
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.pill:hover {
+  color: var(--text);
+  border-color: #31447a;
+}
+
+.pill.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ---------- Formularios ---------- */
+
+.form-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: .85rem;
+  padding: 1.75rem;
+  max-width: 720px;
+}
+
+.form-card .form-label {
+  font-weight: 600;
+  font-size: .9rem;
+}
+
+.form-control,
+.form-select {
+  background-color: #0d1628;
+  border-color: var(--card-border);
+  color: var(--text);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: #0d1628;
+  border-color: var(--accent);
+  color: var(--text);
+  box-shadow: 0 0 0 .2rem rgba(59, 130, 246, .15);
+}
+
+.form-control::placeholder {
+  color: #5b6b8c;
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* ---------- Tarjetas de estadísticas (dashboard) ---------- */
+
+.stat-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: .85rem;
+  padding: 1.25rem 1.4rem;
+  height: 100%;
+}
+
+.stat-card .stat-valor {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.stat-card .stat-nombre {
+  font-size: .9rem;
+  font-weight: 600;
+  margin-bottom: .15rem;
+}
+
+.stat-card .stat-detalle {
+  color: var(--text-muted);
+  font-size: .8rem;
+}
+
+.stat-card .stat-icono {
+  font-size: 1.3rem;
+}
+
+/* ---------- Responsivo ---------- */
+
+@media (max-width: 767.98px) {
+  .app-sidebar {
+    position: static;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .app-main {
+    margin-left: 0;
+    padding: 1.25rem 1rem;
+  }
 }

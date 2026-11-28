@@ -1,8 +1,123 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model GestionTareasUniversitarias.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+    var ahora = DateTime.Now;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<h1 class="page-title">Dashboard</h1>
+<p class="page-subtitle">@ahora.ToString("dddd, d 'de' MMMM 'de' yyyy") · Resumen de tu actividad académica</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icono">⏰</div>
+            <div class="stat-valor">@Model.Pendientes</div>
+            <div class="stat-nombre">Pendientes</div>
+            <div class="stat-detalle">Requieren tu atención</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icono">🔄</div>
+            <div class="stat-valor">@Model.EnProgreso</div>
+            <div class="stat-nombre">En progreso</div>
+            <div class="stat-detalle">Tareas activas</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icono">✅</div>
+            <div class="stat-valor">@Model.Completadas</div>
+            <div class="stat-nombre">Completadas</div>
+            <div class="stat-detalle">Este semestre</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icono">📈</div>
+            <div class="stat-valor">@Model.TasaCompletadas%</div>
+            <div class="stat-nombre">Tasa de productividad</div>
+            <div class="stat-detalle">@Model.Vencidas vencidas · @Model.ProximasAVencer por vencer (72 h)</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Próximas a vencer</h5>
+                <a asp-controller="Tareas" asp-action="Index" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+            </div>
+            @if (!Model.ListaProximas.Any())
+            {
+                <div class="alert alert-info mb-0">
+                    No tienes tareas próximas a vencer en las siguientes 72 horas. ¡Buen trabajo!
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var tarea in Model.ListaProximas)
+                    {
+                        var horas = (tarea.FechaLimite - ahora).TotalHours;
+                        var texto = horas < 24 ? $"en {(int)horas} horas" : $"en {(int)(horas / 24)} días";
+                        <div class="d-flex justify-content-between align-items-center p-2 rounded" style="background: rgba(59,130,246,.07);">
+                            <div>
+                                <strong class="d-block">@tarea.Titulo</strong>
+                                <small class="text-muted">@tarea.Materia?.Nombre</small>
+                            </div>
+                            <span class="estado-badge b-pendiente">⏳ @texto</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Tareas recientes</h5>
+                <a asp-controller="Tareas" asp-action="Create" class="btn btn-sm btn-primary">+ Nueva</a>
+            </div>
+            @if (!Model.ListaRecientes.Any())
+            {
+                <div class="alert alert-info mb-0">
+                    Aún no tienes tareas registradas.
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var tarea in Model.ListaRecientes)
+                    {
+                        var vencida = tarea.Estado != EstadoTarea.Completada && tarea.FechaLimite < ahora;
+                        var clase = vencida ? "b-vencida" :
+                            tarea.Estado == EstadoTarea.Completada ? "b-completada" :
+                            tarea.Estado == EstadoTarea.EnProgreso ? "b-progreso" : "b-pendiente";
+                        var texto = vencida ? "Vencida" : tarea.Estado switch
+                        {
+                            EstadoTarea.EnProgreso => "En progreso",
+                            EstadoTarea.Completada => "Completada",
+                            _ => "Pendiente"
+                        };
+                        <div class="d-flex justify-content-between align-items-center p-2 rounded" style="background: rgba(59,130,246,.07);">
+                            <div>
+                                <strong class="d-block">@tarea.Titulo</strong>
+                                <small class="text-muted">@tarea.Materia?.Nombre · @tarea.FechaLimite.ToString("dd MMM yyyy")</small>
+                            </div>
+                            <span class="estado-badge @clase">@texto</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="mt-4 d-flex gap-2">
+    <a asp-controller="Tareas" asp-action="Create" class="btn btn-primary">+ Nueva tarea</a>
+    <a asp-controller="Materias" asp-action="Create" class="btn btn-outline-secondary">+ Nueva materia</a>
+    <a asp-controller="Estadisticas" asp-action="Index" class="btn btn-outline-secondary">Ver estadísticas</a>
 </div>

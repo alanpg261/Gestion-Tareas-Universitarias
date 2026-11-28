@@ -1,41 +1,45 @@
 @model IEnumerable<GestionTareasUniversitarias.Models.Materia>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Mis materias";
 }
 
-<h1>Index</h1>
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h1 class="page-title">Mis Materias</h1>
+        <p class="page-subtitle mb-0">@Model.Count() materias registradas</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">+ Nueva Materia</a>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Descripcion)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Descripcion)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        No tienes materias registradas. <a asp-action="Create" class="alert-link">Crea tu primera materia</a> para poder asignarle tareas.
+    </div>
 }
-    </tbody>
-</table>
+else
+{
+    <div class="row g-3">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="materia-card">
+                    <div class="d-flex justify-content-between align-items-center gap-2">
+                        <span class="materia-tag tag-@(item.Id % 6)">@item.Nombre</span>
+                        <span class="estado-badge b-progreso">@item.Tareas.Count tareas</span>
+                    </div>
+                    <h5>@item.Nombre</h5>
+                    <p class="desc">@item.Descripcion</p>
+                    <div class="d-flex justify-content-between align-items-center mt-auto pt-2">
+                        <span class="fecha">📚 @item.Tareas.Count @(item.Tareas.Count == 1 ? "tarea asociada" : "tareas asociadas")</span>
+                        <span class="acciones">
+                            <a asp-action="Edit" asp-route-id="@item.Id" title="Editar">✏️</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" title="Eliminar">🗑️</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -1,47 +1,106 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+@using Microsoft.AspNetCore.Identity
+@using GestionTareasUniversitarias.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var controladorActual = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var iniciales = "U";
+    if (SignInManager.IsSignedIn(User))
+    {
+        var correo = UserManager.GetUserName(User) ?? "U";
+        iniciales = correo.Substring(0, 1).ToUpperInvariant();
+    }
+}
+
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - GestionTareasUniversitarias</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - UniTask</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/GestionTareasUniversitarias.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">GestionTareasUniversitarias</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+    <aside class="app-sidebar">
+        <div class="sidebar-brand">
+            <span class="brand-icon">✓</span>
+            <div>
+                <strong>UniTask</strong>
+                <small>Gestión Académica</small>
+            </div>
+        </div>
+
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <div class="sidebar-user">
+                <span class="avatar">@iniciales</span>
+                <div>
+                    <strong>@UserManager.GetUserName(User)</strong>
+                    <small>Estudiante</small>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - GestionTareasUniversitarias - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="sidebar-section">Principal</div>
+            <ul>
+                <li>
+                    <a class="sidebar-link @(controladorActual == "Home" ? "active" : "")"
+                       asp-area="" asp-controller="Home" asp-action="Index">
+                        <span class="icon">📊</span> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link @(controladorActual == "Tareas" ? "active" : "")"
+                       asp-area="" asp-controller="Tareas" asp-action="Index">
+                        <span class="icon">📝</span> Mis tareas
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link @(controladorActual == "Materias" ? "active" : "")"
+                       asp-area="" asp-controller="Materias" asp-action="Index">
+                        <span class="icon">📚</span> Mis materias
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link @(controladorActual == "Estadisticas" ? "active" : "")"
+                       asp-area="" asp-controller="Estadisticas" asp-action="Index">
+                        <span class="icon">📊</span> Estadísticas
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <form asp-area="Identity" asp-page="/Account/Logout"
+                      asp-route-returnUrl="@Url.Action("Index", "Home")" method="post">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">Cerrar sesión</button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <ul>
+                <li>
+                    <a class="sidebar-link" asp-area="Identity" asp-page="/Account/Login">
+                        <span class="icon">🔑</span> Iniciar sesión
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link" asp-area="Identity" asp-page="/Account/Register">
+                        <span class="icon">✨</span> Crear cuenta
+                    </a>
+                </li>
+            </ul>
+        }
+    </aside>
+
+    <main class="app-main">
+        <div class="container-fluid px-0">
+            @RenderBody()
         </div>
-    </footer>
+    </main>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
